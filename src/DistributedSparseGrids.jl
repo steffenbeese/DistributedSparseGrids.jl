@@ -298,6 +298,35 @@ function init_weights_inplace_ops!(asg::SG, cpts::AbstractVector{HCP}, fun::F) w
 end
 
 """
+	init_weights_inplace_static!(asg::SG, cpts::AbstractVector{HCP}, funvals::AbstractArray)
+
+(Re-)Computes all weights in `cpts` using static function values
+from `funvals`. In-place functions `mul!(::RT,::RT)`,`mul!(::RT,::Float64)`,`add!(::RT,::RT)`
+have to be defined.
+
+# Arguments
+- `asg::SG<:AbstractHierarchicalSparseGrid{N,HCP}}`: adaptive sparse grid
+- `cpts::AbstractVector{HCP}`: all weights of the collocation points in `cpts` will be (re-)calculated.
+- `funvals`::AbstractArray: Array containing the function values at the collocation points.
+"""
+function init_weights_static!(asg::SG, cpts::AbstractVector{HCP}, funvals::AbstractArray) where {N, HCP<:AbstractHierarchicalCollocationPoint{N}, SG<:AbstractHierarchicalSparseGrid}
+	for i = 1:numlevels(asg)
+		hcptar = filter(x->level(x)==i, cpts)
+		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
+			_fval = funvals[idx] # Access pre-computed function value
+			set_fval!(hcpt, _fval)
+			if level(hcpt) > 1
+				sw = _fval - interp_below(asg,hcpt)
+				set_scaling_weight!(hcpt,sw)
+			else
+				set_scaling_weight!(hcpt,_fval)
+			end
+		end
+	end
+end
+
+
+"""
 	init_weights_inplace_ops!(asg::SG, fun::F)
 
 (Re-)Computes all weights in `asg` with in-place operations. In-place functions `mul!(::RT,::RT)`,`mul!(::RT,::Float64)`,`add!(::RT,::RT)` have to be defined.
@@ -630,7 +659,6 @@ end
 
 grad(asg::SG, p::AbstractVector) where {N,CP,RT,HCP<:AbstractHierarchicalCollocationPoint{N,CP,RT}, SG<:AbstractHierarchicalSparseGrid{N,HCP}} = ∇(asg,p)
 
-include(joinpath(".","AdaptiveSparseGrids","plotting.jl"))
 export CollocationPoint, HierarchicalCollocationPoint, AHSG, init, generate_next_level!, init_weights!, distributed_init_weights!, init_weights_inplace_ops!, distributed_init_weights_inplace_ops!, integrate, interpolate, interpolate!, integrate_inplace_ops, ∇, grad
 
 end # module
