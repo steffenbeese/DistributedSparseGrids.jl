@@ -310,10 +310,12 @@ have to be defined.
 - `funvals`::AbstractArray: Array containing the function values at the collocation points.
 """
 function init_weights_static!(asg::SG, cpts::AbstractVector{HCP}, funvals::AbstractVector{Float64}) where {N, HCP<:AbstractHierarchicalCollocationPoint{N}, SG<:AbstractHierarchicalSparseGrid}
+	println("init_weights_static!: $funvals")
 	for i = 1:numlevels(asg)
 		hcptar = filter(x->level(x)==i, cpts)
 		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
 			_fval = funvals[idx] # Access pre-computed function value
+			println("_fval: $_fval")
 			set_fval!(hcpt, _fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)

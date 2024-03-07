@@ -92,7 +92,7 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[DistributedSparseGrids]]
 deps = ["AltInplaceOpsInterface", "Colors", "Distributed", "FastGaussQuadrature", "LinearAlgebra", "ProgressMeter", "StaticArrays", "UnicodePlots"]
-git-tree-sha1 = "554bf7a1a163e9703182cbe59464b9351ad5b2cd"
+git-tree-sha1 = "949a89c65782157904a1fa20b704c8bf5aad33bb"
 repo-rev = "main"
 repo-url = "/home/steffen/apps/src/DistributedSparseGrids.jl"
 uuid = "963c640e-cdaa-5978-8b8a-59ae1a680e3d"
