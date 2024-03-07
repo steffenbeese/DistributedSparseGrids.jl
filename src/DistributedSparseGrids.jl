@@ -309,7 +309,7 @@ have to be defined.
 - `cpts::AbstractVector{HCP}`: all weights of the collocation points in `cpts` will be (re-)calculated.
 - `funvals`::AbstractArray: Array containing the function values at the collocation points.
 """
-function init_weights_static!(asg::SG, cpts::AbstractVector{HCP}, funvals::AbstractArray) where {N, HCP<:AbstractHierarchicalCollocationPoint{N}, SG<:AbstractHierarchicalSparseGrid}
+function init_weights_static!(asg::SG, cpts::AbstractVector{HCP}, funvals::AbstractVector{Float64}) where {N, HCP<:AbstractHierarchicalCollocationPoint{N}, SG<:AbstractHierarchicalSparseGrid}
 	for i = 1:numlevels(asg)
 		hcptar = filter(x->level(x)==i, cpts)
 		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
