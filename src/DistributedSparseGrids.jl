@@ -267,6 +267,35 @@ function init_weights!(asg::SG, fun::F) where {SG<:AbstractHierarchicalSparseGri
 end
 
 """
+	init_weights_inplace_static!(asg::SG,funvals::AbstractArray)
+
+(Re-)Computes all weights in `cpts` using static function values
+from `funvals`. In-place functions `mul!(::RT,::RT)`,`mul!(::RT,::Float64)`,`add!(::RT,::RT)`
+have to be defined.
+
+# Arguments
+- `asg::SG<:AbstractHierarchicalSparseGrid{N,HCP}}`: adaptive sparse grid
+- `funvals`::AbstractArray: Array containing the function values at the collocation points.
+"""
+function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalSparseGrid}
+	cpts = collect(asg)
+	for i = 1:numlevels(asg)
+		hcptar = filter(x->level(x)==i, cpts)
+		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
+			_fval = funvals[idx] # Access pre-computed function value
+			set_fval!(hcpt, _fval)
+			if level(hcpt) > 1
+				sw = _fval - interp_below(asg,hcpt)
+				set_scaling_weight!(hcpt,sw)
+			else
+				set_scaling_weight!(hcpt,_fval)
+			end
+		end
+		return nothing
+	end
+end
+
+"""
 	init_weights_inplace_ops!(asg::SG, cpts::AbstractVector{HCP}, fun::F)
 
 (Re-)Computes all weights in `cpts` with in-place operations. In-place functions `mul!(::RT,::RT)`,`mul!(::RT,::Float64)`,`add!(::RT,::RT)` have to be defined.
@@ -296,37 +325,6 @@ function init_weights_inplace_ops!(asg::SG, cpts::AbstractVector{HCP}, fun::F) w
 		end
 	end
 end
-
-"""
-	init_weights_inplace_static!(asg::SG,funvals::AbstractArray)
-
-(Re-)Computes all weights in `cpts` using static function values
-from `funvals`. In-place functions `mul!(::RT,::RT)`,`mul!(::RT,::Float64)`,`add!(::RT,::RT)`
-have to be defined.
-
-# Arguments
-- `asg::SG<:AbstractHierarchicalSparseGrid{N,HCP}}`: adaptive sparse grid
-- `funvals`::AbstractArray: Array containing the function values at the collocation points.
-"""
-function init_weights_static!(asg::SG, funvals::AbstractArray{Float64}) where {N, HCP<:AbstractHierarchicalCollocationPoint{N}, SG<:AbstractHierarchicalSparseGrid}
-	println("init_weights_static!: $funvals")
-	cpts = collect(asg)
-	for i = 1:numlevels(asg)
-		hcptar = filter(x->level(x)==i, cpts)
-		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
-			_fval = funvals[idx] # Access pre-computed function value
-			println("_fval: $_fval")
-			set_fval!(hcpt, _fval)
-			if level(hcpt) > 1
-				sw = _fval - interp_below(asg,hcpt)
-				set_scaling_weight!(hcpt,sw)
-			else
-				set_scaling_weight!(hcpt,_fval)
-			end
-		end
-	end
-end
-
 
 """
 	init_weights_inplace_ops!(asg::SG, fun::F)
