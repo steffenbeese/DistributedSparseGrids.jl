@@ -1,2 +1,3 @@
 [deps]
+DistributedSparseGrids = "963c640e-cdaa-5978-8b8a-59ae1a680e3d"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"

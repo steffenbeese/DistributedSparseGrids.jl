@@ -281,8 +281,10 @@ function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalS
 	cpts = collect(asg)
 	for i = 1:numlevels(asg)
 		hcptar = filter(x->level(x)==i, cpts)
-		Threads.@threads for (idx, hcpt) in enumerate(hcptar)
-			_fval = funvals[idx] # Access pre-computed function value
+		println("level $i")
+		for idx in 1:length(hcptar)
+			hcpt = hcptar[idx]
+			_fval = funvals[pt_idx(hcpt)] # Access pre-computed function value
 			set_fval!(hcpt, _fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
