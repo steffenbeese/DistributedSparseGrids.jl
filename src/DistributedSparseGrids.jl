@@ -316,7 +316,7 @@ Initialize the weights of a hierarchical sparse grid using a static approach.
 This function initializes the weights of the hierarchical sparse grid `asg` using a static approach. It iterates over the levels of the grid and calculates the function values and scaling weights for each grid point.
 
 """
-function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:AbstractHierarchicalSparseGrid}
+function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals::AbstractMatrix) where {SG<:AbstractHierarchicalSparseGrid}
 	cpts = collect(asg)
 	id2 = 0
 	for i = 1:numlevels(asg)	# do it level-wise since interp_below operates on the l-1-level interpolator
@@ -329,8 +329,8 @@ function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:
 			# println("dist: $dist, iddist: $iddist")
 			id2 += 1
 			# _fval = funvals[id2]
-			_fval = funvals[iddist]
-			println("fval: $_fval")
+			_fval = funvals[iddist,:]
+			println("fva2: $_fval, coords: $(coords(hcpt))")
 			set_fval!(hcpt,_fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
