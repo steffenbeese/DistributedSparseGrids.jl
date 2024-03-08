@@ -279,12 +279,14 @@ have to be defined.
 """
 function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalSparseGrid}
 	cpts = collect(asg)
+	iddata= 1
 	for i = 1:numlevels(asg)
 		hcptar = filter(x->level(x)==i, cpts)
 		println("level $i")
 		for idx in 1:length(hcptar)
 			hcpt = hcptar[idx]
-			_fval = funvals[pt_idx(hcpt)] # Access pre-computed function value
+			_fval = funvals[iddata] # Access pre-computed function value
+			iddata += 1
 			set_fval!(hcpt, _fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
