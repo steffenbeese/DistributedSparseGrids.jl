@@ -330,6 +330,7 @@ function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:
 			id2 += 1
 			# _fval = funvals[id2]
 			_fval = funvals[iddist]
+			println("fval: $_fval")
 			set_fval!(hcpt,_fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
