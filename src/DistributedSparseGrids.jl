@@ -299,6 +299,72 @@ function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalS
 	return nothing
 end
 
+
+
+
+"""
+	init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:AbstractHierarchicalSparseGrid}
+
+Initialize the weights of a hierarchical sparse grid using a static approach.
+
+# Arguments
+- `asg::SG`: The hierarchical sparse grid object.
+- `x::AbstractMatrix`: The matrix of grid points.
+- `funvals`: The function values at the grid points.
+
+# Details
+This function initializes the weights of the hierarchical sparse grid `asg` using a static approach. It iterates over the levels of the grid and calculates the function values and scaling weights for each grid point.
+
+"""
+function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:AbstractHierarchicalSparseGrid}
+	cpts = collect(asg)
+	for i = 1:numlevels(asg)	# do it level-wise since interp_below operates on the l-1-level interpolator
+		#println("level $i")
+		hcptar = filter(x->level(x)==i,cpts)
+		Threads.@threads for hcpt in hcptar
+		#for hcpt in hcptar
+			ID = idstring(hcpt)
+			dist,iddist = find_min_distance(coords(hcpt),x)
+			println("dist: $dist, iddist: $iddist")
+			_fval = funvals[iddist]
+			set_fval!(hcpt,_fval)
+			if level(hcpt) > 1
+				sw = _fval - interp_below(asg,hcpt)
+				set_scaling_weight!(hcpt,sw)
+			else
+				set_scaling_weight!(hcpt,_fval)
+			end
+			
+		end
+	end
+end
+
+function find_min_distance(xcur::AbstractVector, x::AbstractMatrix)
+	# Check that xcur has the same dimension as the points in x
+	n_dims = length(xcur)
+	if size(x, 1) != n_dims
+		error("Dimension mismatch between xcur and points in x.")
+	end
+
+	min_dist = Inf # Start with infinity as the minimal distance
+	min_id = -1    # Initialize with an invalid index
+
+	# Iterate over the list of points to compute distances
+	for (id, xi) in enumerate(eachcol(x))
+		dist = sqrt(sum((xcur - xi).^2)) # Euclidean distance
+		
+		# Update the minimum distance and index if necessary
+		if dist < min_dist
+			min_dist = dist
+			min_id = id
+		end
+	end
+
+	return min_dist, min_id
+end
+
+
+
 """
 	init_weights_inplace_ops!(asg::SG, cpts::AbstractVector{HCP}, fun::F)
 
