@@ -318,6 +318,7 @@ This function initializes the weights of the hierarchical sparse grid `asg` usin
 """
 function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:AbstractHierarchicalSparseGrid}
 	cpts = collect(asg)
+	id2 = 0
 	for i = 1:numlevels(asg)	# do it level-wise since interp_below operates on the l-1-level interpolator
 		#println("level $i")
 		hcptar = filter(x->level(x)==i,cpts)
@@ -326,7 +327,8 @@ function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals) where {SG<:
 			ID = idstring(hcpt)
 			dist,iddist = find_min_distance(coords(hcpt),x)
 			println("dist: $dist, iddist: $iddist")
-			_fval = funvals[iddist]
+			id2 += 1
+			_fval = funvals[id2] #funvals[iddist]
 			set_fval!(hcpt,_fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
