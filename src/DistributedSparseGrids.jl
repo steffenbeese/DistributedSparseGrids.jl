@@ -295,8 +295,8 @@ function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalS
 				set_scaling_weight!(hcpt,_fval)
 			end
 		end
-		return nothing
 	end
+	return nothing
 end
 
 """
