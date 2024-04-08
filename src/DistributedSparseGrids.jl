@@ -282,7 +282,6 @@ function init_weights_static!(asg::SG, funvals) where {SG<:AbstractHierarchicalS
 	iddata= 1
 	for i = 1:numlevels(asg)
 		hcptar = filter(x->level(x)==i, cpts)
-		println("level $i")
 		for idx in 1:length(hcptar)
 			hcpt = hcptar[idx]
 			_fval = funvals[iddata] # Access pre-computed function value
@@ -328,9 +327,8 @@ function init_weights_static_2!(asg::SG, x::AbstractMatrix, funvals::AbstractMat
 			dist,iddist = find_min_distance(coords(hcpt),x)
 			# println("dist: $dist, iddist: $iddist")
 			id2 += 1
-			# _fval = funvals[id2]
+			# _fval = funvals[id2,:]
 			_fval = funvals[iddist,:]
-			println("fva2: $_fval, coords: $(coords(hcpt))")
 			set_fval!(hcpt,_fval)
 			if level(hcpt) > 1
 				sw = _fval - interp_below(asg,hcpt)
